@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<body>
+  <div id="app">
+    <!-- input de texto para nome -->
+    <input type="text" v-model="nome" :style="estilo" v-on:change="alterei"><br><br>
+    <!-- textarea para nome2 -->
+    <textarea v-model="nome2">
+    </textarea><br>
+    <!-- exibição dos valores de nome2 e nome -->
+     {{nome2}} <br>  {{nome}} <br> 
+    <!-- exibição de uma div com o texto "Olá Mundo" quando mostrar_div é verdadeiro -->
+    <div id="div_ola" v-if="mostrar_div" v-html="msg">
+      Olá Mundo.
+    </div><br>
+    <!-- botões para mostrar/esconder a div com o texto "Olá Mundo" -->
+    <button type="button" v-on:click="mostrar" v-if="!mostrar_div">Mostrar</button>
+    <button type="button" v-on:click="esconder" v-if="mostrar_div">Esconder</button>
+    <!-- lista com input de texto para cada item -->
+    <ul>
+      <li v-for="(item, index) in lista" :key="index">
+        {{item.nome}}
+        <input type="text" v-model="item.nome">
+      </li>
+    </ul>
+    <!-- dropdown para selecionar um nome da lista -->
+    <select v-model="nome_selecionado">
+      <option v-for="(item, index) in lista" :key="index" :value="item.nome">{{item.nome}}</option>
+    </select>
+    <!-- exibição do nome selecionado e quantas vezes ele foi alterado -->
+    O nome selecionado foi: {{nome_selecionado}} - e alteramos {{qtde}} vezes.
+    <br><br>
+    <!-- input de texto para CEP -->
+    <h4>CEP</h4>
+    <input type="text" v-model="cep" v-on:change="consulta_cep" maxlength="8">
+    <!-- exibição dos dados do CEP após consulta -->
+    <div v-if="cep_data != null ">
+      Logradouro: {{cep_data.logradouro}}
+      <table>
+        <tr v-for="(item,index) in cep_keys">
+          <td>
+            {{item}}
+          </td>
+          <td>
+            {{ cep_data[item] }}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>// cria uma nova instância do Vue.js e passa um objeto com propriedades e métodos como parâmetro
+var app = new Vue({
+  // indica qual elemento HTML será gerenciado pelo Vue.js
+  el: "#app",
+  // objeto que contém as variáveis ​​e seus valores que serão usados na aplicação
+  data: {
+    mostrar_div: true,
+    // booleana para controlar a exibição de uma div
+    nome: "Rafael",
+    // uma string com um nome
+    nome2: "Televisão",
+    // uma outra string com um nome
+    lista: [
+    // uma lista de objetos, cada objeto contém uma propriedade "nome"
+    {
+      nome: "Nome 01"
+    }, {
+      nome: "Nome 02"
+    }, {
+      nome: "Nome 03"
+    }],
+    qtde: 0,
+    // um contador que será incrementado toda vez que uma opção for selecionada em um <select>
+    cep: "",
+    // uma string que receberá um CEP digitado pelo usuário
+    cep_data: null,
+    // um objeto que conterá os dados de um CEP consultado na API ViaCEP
+    cep_keys: [],
+    // uma lista de chaves do objeto cep_data
+    nome_selecionado: "",
+    // uma string que conterá o nome de uma opção selecionada em um <select>
+    estilo: "background-color:green",
+    // uma string que contém um estilo CSS para ser aplicado a um input
+    msg: "Olá Mundo." // uma mensagem para ser exibida em uma div
+  },
+
+  methods: {
+    // métodos que serão usados na aplicação
+    mostrar: function mostrar() {
+      // método que muda o valor de mostrar_div para true
+      this.mostrar_div = true;
+    },
+    esconder: function esconder() {
+      // método que muda o valor de mostrar_div para false
+      this.mostrar_div = false;
+    },
+    alterei: function alterei(event) {
+      // método que será chamado quando o valor de um input for alterado
+      // alert("eu alterei o valor");
+      console.log("valor? ", event.target.value);
+      console.log("evento? ", event);
+    },
+    consulta_cep: function consulta_cep() {
+      // método que consulta a API ViaCEP quando um CEP é digitado
+      var self = this;
+      axios.get("https://viacep.com.br/ws/" + this.cep + "/json/").then(function (response) {
+        // se a consulta for bem-sucedida
+        console.log(response);
+        self.cep_data = response.data;
+        self.cep_keys = Object.keys(self.cep_data);
+      }).catch(function (error) {// se houver um erro na consulta
+        // console.log(error);
+      }).finally(function () {
+        // sempre será executado, independente do resultado da consulta
+      });
+    }
+  },
+  watch: {
+    // observa mudanças em variáveis específicas e dispara ações quando houver mudanças
+    nome_selecionado: function nome_selecionado() {
+      // quando o valor de nome_selecionado for alterado
+      this.qtde++; // incrementa o valor de qtde
+    }
+  },
+  created: function created() {
+    // é executado quando a instância do Vue.js é criada
+    console.log(" eu criei o componente ");
+  },
+  mounted: function mounted() {
+    // é executado após o Vue.js ter sido montado no elemento HTML indicado
+    console.log(" eu montei o componente ");
+  }
+});</script>
